@@ -1,16 +1,25 @@
 import styled, { keyframes } from "styled-components";
 
 const Wrapper = styled.div`
+  height: 100vh;
   display: flex;
+  justify-content: center;
+  align-items: center;
 `;
+
+const Emoji = styled.span`
+  font-size: 50px;
+`;
+
 const animation = keyframes`
-  from {
-    transform:rotate(0deg);
-  }
-  to {
-    transform:rotate(360deg);
-  }
-`;
+    from {transform:rotate(0deg);
+      border-radius: 25%;
+    }
+    to {
+      transform:rotate(360deg);
+      border-radius: 50%;
+    }
+  `;
 
 const Box = styled.div`
   background-color: tomato;
@@ -20,9 +29,8 @@ const Box = styled.div`
   justify-content: center;
   align-items: center;
   animation: ${animation} 1s linear infinite;
-  span {
-    font-size: 50px;
 
+  ${Emoji} {
     &:hover {
       font-size: 70px;
     }
@@ -33,7 +41,7 @@ function App() {
   return (
     <Wrapper>
       <Box>
-        <span>😀</span>
+        <Emoji>😀</Emoji>
       </Box>
     </Wrapper>
   );
