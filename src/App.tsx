@@ -69,7 +69,7 @@ function App() {
     //부모없이 붙어있는 것들을 리턴할 수 있게 해준다.
     <>
       <GlobalStyle />
-      <Router />;
+      <Router />
     </>
   );
 }
