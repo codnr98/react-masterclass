@@ -1,4 +1,3 @@
-import { useLocation, useParams } from "react-router-dom";
 import styled from "styled-components";
 
 const Container = styled.div`
@@ -23,17 +22,13 @@ const Title = styled.div`
   font-weight: 700;
 `;
 
-function Coin() {
-  // useParams()는 매치되는 <Route path>에 의해 current URL을 가져온다.
-  // Coins.tsx에서 보내진 state를 기반으로 title을 출력한다.
-  const { state } = useLocation();
+function Header() {
   return (
     <Container>
       <Wrapper>
-        <Title>{state.name}</Title>
+        <Title>COIN INFO</Title>
       </Wrapper>
     </Container>
   );
 }
-
-export default Coin;
+export default Header;
