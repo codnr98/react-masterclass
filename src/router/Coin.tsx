@@ -30,31 +30,60 @@ const Loading = styled(Title)`
   font-weight: 700;
 `;
 
+const InfoWrapper = styled.div`
+  height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+const OverView = styled.div`
+  width: 90%;
+  height: 80px;
+  margin-top: 20px;
+  background-color: ${(props) => props.theme.accentColor};
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+
+  span:first-child {
+    font-size: 30px;
+  }
+`;
+
+const OverViewItem = styled.div`
+  height: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  font-size: 20px;
+  color: ${(props) => props.theme.bgColor};
+`;
+
+const CoinDescription = styled.div`
+  width: 90%;
+  margin-top: 20px;
+  font-size: 19px;
+  font-weight: 500;
+`;
+
 interface InfoData {
   id: string;
   name: string;
   symbol: string;
   rank: number;
-  is_new: boolean;
-  is_active: boolean;
-  type: string;
   logo: string;
-  tags: object;
-  team: object;
   description: string;
-  message: string;
   open_source: boolean;
-  started_at: string;
-  development_status: string;
-  hardware_wallet: boolean;
-  proof_type: string;
-  org_structure: string;
-  hash_algorithm: string;
-  links: object;
-  links_extended: object;
-  whitepaper: object;
-  first_data_at: string;
-  last_data_at: string;
+}
+
+interface IQuotes {
+  USD: {
+    price: number;
+  };
 }
 
 interface PriceData {
@@ -62,21 +91,17 @@ interface PriceData {
   name: string;
   symbol: string;
   rank: number;
-  circulating_supply: number;
   total_supply: number;
   max_supply: number;
-  beta_value: number;
-  first_data_at: string;
-  last_updated: string;
-  quotes: object;
+  quotes: IQuotes;
 }
 
 function Coin() {
   // useParams()는 매치되는 <Route path>에 의해 current URL을 가져온다.
   // Coins.tsx에서 보내진 state를 기반으로 title을 출력한다.
   const [loading, setLoading] = useState(true);
-  const [info, setInfo] = useState({});
-  const [price, setPrice] = useState({});
+  const [info, setInfo] = useState<InfoData>();
+  const [price, setPrice] = useState<PriceData>();
   const { coinId } = useParams();
   const { state } = useLocation();
   useEffect(() => {
@@ -87,18 +112,59 @@ function Coin() {
       const priceData = await (
         await fetch(`https://api.coinpaprika.com/v1/tickers/${coinId}`)
       ).json();
-      console.log(priceData);
       setInfo(infoData);
       setPrice(priceData);
       setLoading(false);
     })();
-  }, []);
+  }, [coinId]);
   return (
-    <Container>
-      <Wrapper>
-        {loading ? <Loading>Loading...</Loading> : <Title>{state.name}</Title>}
-      </Wrapper>
-    </Container>
+    <>
+      <Container>
+        <Wrapper>
+          {/* 별도의 URL을 통해 들어왔을 경우 api를 통해 코인이름을 로드한다. */}
+          {state.name ? (
+            <Title>{state.name}</Title>
+          ) : loading ? (
+            <Loading>Loading...</Loading>
+          ) : (
+            info?.name
+          )}
+        </Wrapper>
+      </Container>
+
+      <InfoWrapper>
+        <OverView>
+          <OverViewItem>
+            <span>Rank: </span>
+            <span>{info?.rank}</span>
+          </OverViewItem>
+          <OverViewItem>
+            <span>Name: </span>
+            <span>{info?.name}</span>
+          </OverViewItem>
+          <OverViewItem>
+            <span>Symbol: </span>
+            <span>{info?.symbol}</span>
+          </OverViewItem>
+        </OverView>
+
+        <CoinDescription>
+          <p>{info?.description}</p>
+        </CoinDescription>
+
+        <OverView>
+          <OverViewItem>
+            <span>total supply: </span>
+            <span>{price?.total_supply}</span>
+          </OverViewItem>
+          <OverViewItem></OverViewItem>
+          <OverViewItem>
+            <span>max supply: </span>
+            <span>{price?.max_supply}</span>
+          </OverViewItem>
+        </OverView>
+      </InfoWrapper>
+    </>
   );
 }
 
