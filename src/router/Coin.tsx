@@ -1,5 +1,11 @@
 import { useEffect, useState } from "react";
-import { useLocation, useParams } from "react-router-dom";
+import {
+  useLocation,
+  useParams,
+  Outlet,
+  Link,
+  useMatch,
+} from "react-router-dom";
 import styled from "styled-components";
 
 const Container = styled.div`
@@ -31,7 +37,6 @@ const Loading = styled(Title)`
 `;
 
 const InfoWrapper = styled.div`
-  height: 100vh;
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -70,6 +75,26 @@ const CoinDescription = styled.div`
   font-weight: 500;
 `;
 
+const Buttons = styled.div`
+  width: 90%;
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-between;
+`;
+
+const Button = styled(Link)<{ isActive: boolean }>`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 8px;
+  width: 45%;
+  height: 50px;
+  background-color: ${(props) => props.theme.accentColor};
+  color: ${(props) =>
+    props.isActive ? props.theme.activeColor : props.theme.bgColor};
+  font-size: 20px;
+`;
+
 interface InfoData {
   id: string;
   name: string;
@@ -104,6 +129,8 @@ function Coin() {
   const [price, setPrice] = useState<PriceData>();
   const { coinId } = useParams();
   const { state } = useLocation();
+  const priceMatch = useMatch("/:coinId/price");
+  const chartMatch = useMatch("/:coinId/chart");
   useEffect(() => {
     (async () => {
       const infoData = await (
@@ -122,12 +149,12 @@ function Coin() {
       <Container>
         <Wrapper>
           {/* 별도의 URL을 통해 들어왔을 경우 api를 통해 코인이름을 로드한다. */}
-          {state.name ? (
+          {state?.name ? (
             <Title>{state.name}</Title>
           ) : loading ? (
             <Loading>Loading...</Loading>
           ) : (
-            info?.name
+            <Title>{info?.name}</Title>
           )}
         </Wrapper>
       </Container>
@@ -137,6 +164,7 @@ function Coin() {
           <OverViewItem>
             <span>Rank: </span>
             <span>{info?.rank}</span>
+            {/* info?의 ?는 .rank의 데이터가 없을경우 데이터를 요구하지 않는다는 의미 */}
           </OverViewItem>
           <OverViewItem>
             <span>Name: </span>
@@ -151,7 +179,6 @@ function Coin() {
         <CoinDescription>
           <p>{info?.description}</p>
         </CoinDescription>
-
         <OverView>
           <OverViewItem>
             <span>total supply: </span>
@@ -163,6 +190,15 @@ function Coin() {
             <span>{price?.max_supply}</span>
           </OverViewItem>
         </OverView>
+        <Buttons>
+          <Button isActive={priceMatch !== null} to="price">
+            Price
+          </Button>
+          <Button isActive={chartMatch !== null} to="chart">
+            Chart
+          </Button>
+        </Buttons>
+        <Outlet />
       </InfoWrapper>
     </>
   );
