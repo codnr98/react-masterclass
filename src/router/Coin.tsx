@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import {
   useLocation,
   useParams,
@@ -7,6 +8,7 @@ import {
   useMatch,
 } from "react-router-dom";
 import styled from "styled-components";
+import { fetchPrice, fetchInfo } from "../api";
 
 const Container = styled.div`
   width: 100%;
@@ -124,26 +126,20 @@ interface PriceData {
 function Coin() {
   // useParams()는 매치되는 <Route path>에 의해 current URL을 가져온다.
   // Coins.tsx에서 보내진 state를 기반으로 title을 출력한다.
-  const [loading, setLoading] = useState(true);
-  const [info, setInfo] = useState<InfoData>();
-  const [price, setPrice] = useState<PriceData>();
-  const { coinId } = useParams();
+  const { coinId } = useParams(); // react-route-Dom v6 부터는 useParams의 값이 자동으로 string | undefined로 할당이 된다.
   const { state } = useLocation();
   const priceMatch = useMatch("/:coinId/price");
   const chartMatch = useMatch("/:coinId/chart");
-  useEffect(() => {
-    (async () => {
-      const infoData = await (
-        await fetch(`https://api.coinpaprika.com/v1/coins/${coinId}`)
-      ).json();
-      const priceData = await (
-        await fetch(`https://api.coinpaprika.com/v1/tickers/${coinId}`)
-      ).json();
-      setInfo(infoData);
-      setPrice(priceData);
-      setLoading(false);
-    })();
-  }, [coinId]);
+  const { isLoading: infoLoading, data: infoData } = useQuery<InfoData>(
+    ["info", coinId],
+    () => fetchInfo(coinId)
+  );
+  const { isLoading: priceLoading, data: priceData } = useQuery<PriceData>(
+    ["price", coinId],
+    () => fetchPrice(coinId)
+  );
+  const loading = infoLoading || priceLoading;
+
   return (
     <>
       <Container>
@@ -154,7 +150,7 @@ function Coin() {
           ) : loading ? (
             <Loading>Loading...</Loading>
           ) : (
-            <Title>{info?.name}</Title>
+            <Title>{infoData?.name}</Title>
           )}
         </Wrapper>
       </Container>
@@ -163,33 +159,35 @@ function Coin() {
         <OverView>
           <OverViewItem>
             <span>Rank: </span>
-            <span>{info?.rank}</span>
+            <span>{infoData?.rank}</span>
             {/* info?의 ?는 .rank의 데이터가 없을경우 데이터를 요구하지 않는다는 의미 */}
           </OverViewItem>
           <OverViewItem>
             <span>Name: </span>
-            <span>{info?.name}</span>
+            <span>{infoData?.name}</span>
           </OverViewItem>
           <OverViewItem>
             <span>Symbol: </span>
-            <span>{info?.symbol}</span>
+            <span>{infoData?.symbol}</span>
           </OverViewItem>
         </OverView>
 
         <CoinDescription>
-          <p>{info?.description}</p>
+          <p>{infoData?.description}</p>
         </CoinDescription>
+
         <OverView>
           <OverViewItem>
             <span>total supply: </span>
-            <span>{price?.total_supply}</span>
+            <span>{priceData?.total_supply}</span>
           </OverViewItem>
           <OverViewItem></OverViewItem>
           <OverViewItem>
             <span>max supply: </span>
-            <span>{price?.max_supply}</span>
+            <span>{priceData?.max_supply}</span>
           </OverViewItem>
         </OverView>
+
         <Buttons>
           <Button isActive={priceMatch !== null} to="price">
             Price
