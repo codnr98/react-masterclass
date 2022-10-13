@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
+import { fetchCoins } from "../api";
 import Header from "./Header";
 
 const CoinList = styled.div`
@@ -40,7 +41,7 @@ const Img = styled.img`
   margin-left: 10px;
 `;
 
-interface CoinInterface {
+interface ICoin {
   id: string;
   name: string;
   symbol: string;
@@ -51,24 +52,16 @@ interface CoinInterface {
 }
 
 function Coins() {
-  const [coins, setCoins] = useState<CoinInterface[]>([]);
-  const [loading, setLoading] = useState(true);
-  useEffect(() => {
-    (async () => {
-      const response = await fetch("https://api.coinpaprika.com/v1/coins");
-      const json = await response.json();
-      setCoins(json.slice(0, 100)); //arr.slice(0,100) arr의 0, 100을 제외한 나머지를 자른다.
-      setLoading(false);
-    })(); // (()=>{})() 함수를 할당과 동시에 호출한다.
-  }, []);
+  //react query는 해당 response를 caching하고 있다. 그래서 다른페이지를 다녀와도 react query는 데이터를 caching하고 있기에 다시 api에 접근하지 않는다.
+  const { isLoading, data } = useQuery<ICoin[]>(["allCoins"], fetchCoins);
   return (
     <>
       <Header />
-      {loading ? (
+      {isLoading ? (
         <Loading>Loading...</Loading>
       ) : (
         <CoinList>
-          {coins.map((item) => (
+          {data?.slice(0, 100).map((item) => (
             <Coin key={item.id}>
               <Img
                 src={`https://coinicons-api.vercel.app/api/icon/${item.symbol.toLowerCase()}`}
