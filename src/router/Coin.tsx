@@ -97,6 +97,14 @@ const Button = styled(Link)<{ isActive: boolean }>`
   font-size: 20px;
 `;
 
+const ChartWrapper = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 90%;
+  margin-top: 20px;
+`;
+
 interface InfoData {
   id: string;
   name: string;
@@ -196,7 +204,9 @@ function Coin() {
             Chart
           </Button>
         </Buttons>
-        <Outlet />
+        <ChartWrapper>
+          <Outlet />
+        </ChartWrapper>
       </InfoWrapper>
     </>
   );
